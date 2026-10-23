@@ -1,0 +1,1217 @@
+/* =====================================================================
+   Slayders AI — app.css  (Premium redesign, T2 — emoji-free)
+   Telegram Mini App · mobile-first · dark mode via themeParams
+   Brand: #6C5CE7 → #00B8D9 gradient accent
+   ===================================================================== */
+
+/* ── 0. Google Font (Inter) fallback if CDN missing ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── 1. CSS custom properties ── */
+:root {
+  /* Telegram theme vars (overridden by JS from themeParams) */
+  --tg-bg:            #ffffff;
+  --tg-secondary-bg:  #f4f4f6;
+  --tg-text:          #0d0d0d;
+  --tg-hint:          #8a8a8e;
+  --tg-link:          #2481cc;
+  --tg-button:        #2481cc;
+  --tg-button-text:   #ffffff;
+  --tg-header-bg:     #527da3;
+
+  /* Brand */
+  --accent:           #6C5CE7;
+  --accent-2:         #00B8D9;
+  --accent-tint:      rgba(108,92,231,0.10);
+  --accent-tint-2:    rgba(0,184,217,0.10);
+  --gradient:         linear-gradient(135deg, #6C5CE7 0%, #00B8D9 100%);
+  --gradient-rev:     linear-gradient(135deg, #00B8D9 0%, #6C5CE7 100%);
+
+  /* Surfaces */
+  --bubble-out-bg:    var(--accent);
+  --bubble-out-text:  #ffffff;
+  --bubble-in-bg:     var(--tg-secondary-bg);
+  --bubble-in-text:   var(--tg-text);
+
+  /* Layout */
+  --bottom-pad:       env(safe-area-inset-bottom, 0px);
+  --tab-h:            60px;
+  --radius-bubble:    18px;
+  --radius-card:      16px;
+  --radius-chip:      20px;
+  --transition:       0.18s ease;
+  --shadow-card:      0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(108,92,231,0.07);
+  --shadow-card-hover:0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(108,92,231,0.14);
+}
+
+/* ── 2. Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  background: var(--tg-bg);
+  color: var(--tg-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── 3. App shell ── */
+#app {
+  display: flex;
+  flex-direction: column;
+  /* Use stable viewport height so the keyboard does not collapse the shell */
+  height: var(--tg-viewport-stable-height, 100dvh);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── 4. Screens ── */
+.screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* account for tab bar */
+  padding-bottom: calc(var(--tab-h) + var(--bottom-pad));
+}
+.screen::-webkit-scrollbar { width: 0; }
+.screen.active { display: flex; }
+
+/* ── 5. Global banner ── */
+.banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  border-radius: 0 0 12px 12px;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  pointer-events: none;
+}
+.banner.error  { background: #e53935; color: #fff; }
+.banner.warn   { background: #f57c00; color: #fff; }
+.banner.info   { background: var(--accent); color: #fff; }
+.banner.hidden { display: none; }
+
+/* ── 6. Tab bar ── */
+.tab-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: stretch;
+  height: calc(var(--tab-h) + var(--bottom-pad));
+  padding-bottom: var(--bottom-pad);
+  background: var(--tg-bg);
+  border-top: 1px solid rgba(128,128,128,0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  background: transparent;
+  color: var(--tg-hint);
+  cursor: pointer;
+  padding: 6px 4px 2px;
+  transition: color var(--transition);
+  -webkit-user-select: none;
+  user-select: none;
+  position: relative;
+}
+
+/* Active pill indicator — small dot under icon */
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 18px; height: 3px;
+  border-radius: 2px;
+  background: var(--gradient);
+  transition: transform 0.22s cubic-bezier(.4,0,.2,1);
+}
+.tab-btn.active::after { transform: translateX(-50%) scaleX(1); }
+.tab-btn.active { color: var(--accent); }
+
+.tab-icon {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.18s cubic-bezier(.4,0,.2,1);
+}
+.tab-btn.active .tab-icon { transform: scale(1.10); }
+.tab-icon svg { width: 22px; height: 22px; }
+
+.tab-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  line-height: 1;
+}
+
+/* ── 7. Home screen ── */
+.hero {
+  background: var(--gradient);
+  padding: 36px 20px 30px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -50px; left: -40px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.16);
+  color: rgba(255,255,255,0.92);
+  border-radius: 30px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(6px);
+}
+.hero-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.7px;
+  margin-bottom: 8px;
+  line-height: 1.15;
+}
+.hero-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+.limit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  border-radius: var(--radius-chip);
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.24);
+}
+.limit-chip-icon {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Services — premium list cards ── */
+.services-section {
+  padding: 22px 16px 16px;
+}
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tg-hint);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+/* List layout: 1 column, full-width rows */
+.service-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Skeleton still uses a 4-col grid for shimmer rows */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.service-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
+  background: var(--tg-secondary-bg);
+  border-radius: var(--radius-card);
+  border: 1px solid rgba(128,128,128,0.10);
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  text-align: left;
+  box-shadow: var(--shadow-card);
+  width: 100%;
+}
+.service-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgba(108,92,231,0.18);
+}
+.service-card:active {
+  transform: scale(0.975);
+  box-shadow: none;
+}
+
+/* Icon tile — 40px rounded-xl with soft accent tint */
+.service-card-icon {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px;           /* rounded-xl equivalent */
+  flex-shrink: 0;
+  color: var(--accent);
+  background: var(--accent-tint);
+  border: 1px solid rgba(108,92,231,0.12);
+  transition: background 0.14s ease;
+}
+
+/* Per-service tint colors for variety */
+.service-icon--presentation  { color: #6C5CE7; background: rgba(108,92,231,0.10); border-color: rgba(108,92,231,0.14); }
+.service-icon--file-text     { color: #00B8D9; background: rgba(0,184,217,0.10);  border-color: rgba(0,184,217,0.14); }
+.service-icon--book-open     { color: #10b981; background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.14); }
+.service-icon--list-checks   { color: #f59e0b; background: rgba(245,158,11,0.10); border-color: rgba(245,158,11,0.14); }
+.service-icon--grid-3x3      { color: #8b5cf6; background: rgba(139,92,246,0.10); border-color: rgba(139,92,246,0.14); }
+.service-icon--pen-line      { color: #ef4444; background: rgba(239,68,68,0.10);  border-color: rgba(239,68,68,0.14); }
+.service-icon--target         { color: #f97316; background: rgba(249,115,22,0.10); border-color: rgba(249,115,22,0.14); }
+.service-icon--columns-2     { color: #06b6d4; background: rgba(6,182,212,0.10);  border-color: rgba(6,182,212,0.14); }
+
+.service-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.service-card-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tg-text);
+  letter-spacing: -0.1px;
+  line-height: 1.2;
+}
+.service-card-desc {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--tg-hint);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.service-card-arrow {
+  color: var(--tg-hint);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity 0.14s, transform 0.14s;
+}
+.service-card:hover .service-card-arrow {
+  opacity: 0.8;
+  transform: translateX(2px);
+}
+
+/* ── 8. Screen header (files, profile) ── */
+.screen-header {
+  padding: 22px 16px 14px;
+  flex-shrink: 0;
+}
+.screen-header-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--tg-text);
+  letter-spacing: -0.4px;
+}
+
+/* ── 9. Chat screen – messages ── */
+/*
+  Chat screen uses a flex-column layout that fills the available viewport.
+  When the soft keyboard opens, Telegram Mini Apps report the reduced
+  viewport height via --tg-viewport-stable-height. We use dvh + that CSS
+  variable to keep the composer always visible above the keyboard.
+*/
+.screen#screen-chat {
+  /* keeps default tab-bar padding so the composer sits just above the tab bar */
+  min-height: 0;
+  overflow: hidden; /* .messages scrolls internally */
+}
+#screen-chat {
+  display: none;
+  flex-direction: column;
+  /* The tab bar is hidden when chat is active (we rely on BackButton),
+     so fill the entire viewport from top to bottom. */
+}
+#screen-chat.active { display: flex; }
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  /* Ensure it can shrink when keyboard appears */
+  min-height: 0;
+}
+.messages::-webkit-scrollbar { width: 0; }
+
+/* ── 10. Chat bubbles ── */
+.msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 100%;
+  animation: pop-in 0.16s cubic-bezier(.4,0,.2,1) both;
+}
+.msg-row.out { flex-direction: row-reverse; }
+.msg-row.in  { flex-direction: row; }
+
+.bubble {
+  position: relative;
+  max-width: min(78%, 480px);
+  padding: 9px 13px;
+  border-radius: var(--radius-bubble);
+  word-break: break-word;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  font-size: 15px;
+}
+.msg-row.out .bubble {
+  background: var(--gradient);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+.msg-row.in .bubble {
+  background: var(--bubble-in-bg);
+  color: var(--bubble-in-text);
+  border-bottom-left-radius: 5px;
+}
+.bubble-time {
+  display: block;
+  font-size: 10.5px;
+  opacity: 0.55;
+  margin-top: 4px;
+  text-align: right;
+}
+.msg-row.in .bubble-time { text-align: left; }
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.93) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── 11. Typing indicator ── */
+.typing-wrap {
+  padding: 4px 12px 2px;
+  flex-shrink: 0;
+}
+.typing-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bubble-in-bg);
+  color: var(--tg-hint);
+  padding: 8px 14px;
+  border-radius: var(--radius-bubble);
+  border-bottom-left-radius: 5px;
+  font-size: 13px;
+  animation: pop-in 0.16s ease both;
+}
+.typing-label { font-size: 13px; }
+
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--tg-hint);
+  display: inline-block;
+  animation: bounce 1.2s infinite ease-in-out;
+}
+.dot:nth-child(1) { animation-delay: 0s; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-6px); }
+}
+
+/* ── 12. Suggestion chips ── */
+.chips-bar {
+  flex-shrink: 0;
+  padding: 0 12px 8px;
+}
+.chips-bar.hidden { display: none; }
+.chips-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.chips-scroll::-webkit-scrollbar { display: none; }
+.chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: var(--radius-chip);
+  background: var(--tg-secondary-bg);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid rgba(108,92,231,0.25);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition), transform 0.1s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.chip:active {
+  background: var(--accent);
+  color: #fff;
+  transform: scale(0.96);
+}
+
+/* ── 13. Plan card ── */
+.plan-card {
+  background: var(--tg-secondary-bg);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  margin: 4px 0;
+  border: 1px solid rgba(108,92,231,0.14);
+  border-left: 3px solid var(--accent);
+  box-shadow: var(--shadow-card);
+  animation: pop-in 0.18s ease both;
+}
+.plan-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 10px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+.plan-fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  font-size: 13.5px;
+}
+.plan-field-label {
+  color: var(--tg-hint);
+  white-space: nowrap;
+  font-weight: 500;
+}
+.plan-field-value {
+  color: var(--tg-text);
+  word-break: break-word;
+  font-weight: 500;
+}
+.plan-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+/* ── 14. Job card with step checklist ── */
+.job-card {
+  background: var(--tg-secondary-bg);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  margin: 4px 0;
+  font-size: 13.5px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(128,128,128,0.08);
+  animation: pop-in 0.18s ease both;
+}
+.job-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.job-kind-badge {
+  background: var(--gradient);
+  color: #fff;
+  border-radius: 30px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.job-title {
+  font-weight: 600;
+  flex: 1;
+  color: var(--tg-text);
+  font-size: 14px;
+}
+
+/* Step checklist */
+.job-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 2px 0 10px;
+}
+.job-step {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--tg-hint);
+  transition: color var(--transition);
+}
+.job-step.done   { color: var(--tg-text); }
+.job-step.active { color: var(--accent); font-weight: 600; }
+.job-step.failed { color: #e53935; }
+
+.step-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+  position: relative;
+}
+.job-step.done .step-dot {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+}
+.job-step.active .step-dot {
+  border-color: var(--accent);
+  background: transparent;
+}
+.job-step.active .step-dot::after {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  border-top-color: transparent;
+  position: absolute;
+  animation: spin 0.8s linear infinite;
+}
+.job-step.failed .step-dot {
+  border-color: #e53935;
+  background: #e53935;
+  color: #fff;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Job status / counter */
+.job-status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--tg-hint);
+  margin-bottom: 4px;
+}
+.job-status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-queued  .job-status-dot { background: #f0a500; }
+.status-running .job-status-dot { background: var(--accent); animation: pulse-dot 1.2s infinite; }
+.status-done    .job-status-dot { background: #22c55e; }
+.status-failed  .job-status-dot { background: #e53935; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+.job-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.job-error-msg {
+  color: #e53935;
+  font-size: 12px;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* ── 15. Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 20px;
+  border: none;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition), transform 0.1s, box-shadow 0.1s;
+  -webkit-user-select: none;
+  user-select: none;
+  font-family: inherit;
+}
+.btn:active   { opacity: 0.75; transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.btn-primary {
+  background: var(--gradient);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(108,92,231,0.32);
+}
+.btn-primary:active { box-shadow: none; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid rgba(108,92,231,0.30);
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--tg-hint);
+  border: 1.5px solid rgba(128,128,128,0.30);
+}
+.btn-danger  { background: #e53935; color: #fff; }
+.btn-success {
+  background: #22c55e;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(34,197,94,0.28);
+}
+
+/* ── 16. Bottom input bar (chat) ── */
+.bottom-bar {
+  background: var(--tg-bg);
+  border-top: 1px solid rgba(128,128,128,0.10);
+  padding: 6px 12px calc(6px + var(--bottom-pad));
+  flex-shrink: 0;
+  transition: background var(--transition);
+  /* Never let the bar collapse — always visible above keyboard */
+  position: relative;
+  z-index: 10;
+}
+.quota-info {
+  font-size: 12px;
+  color: var(--tg-hint);
+  text-align: center;
+  padding-bottom: 5px;
+  min-height: 18px;
+  font-weight: 500;
+}
+.quota-warn {
+  background: rgba(246,144,0,0.10);
+  color: #c45200;
+  border-radius: 10px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  font-weight: 500;
+  border: 1px solid rgba(246,144,0,0.20);
+}
+.quota-warn.hidden { display: none; }
+
+@media (prefers-color-scheme: dark) {
+  .quota-warn { background: rgba(246,144,0,0.15); color: #ffcc80; border-color: rgba(246,144,0,0.3); }
+}
+
+/* Attachment chips row (staged files) */
+.attach-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 6px;
+}
+.attach-chips.hidden { display: none; }
+
+.attach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--tg-secondary-bg);
+  border: 1.5px solid rgba(108,92,231,0.22);
+  border-radius: 10px;
+  padding: 4px 8px 4px 10px;
+  font-size: 12px;
+  color: var(--tg-text);
+  max-width: 160px;
+  position: relative;
+  overflow: hidden;
+}
+.attach-chip-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+.attach-chip-size {
+  color: var(--tg-hint);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.attach-chip-remove {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--tg-hint);
+  cursor: pointer;
+  padding: 0 0 0 4px;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+.attach-chip-remove:hover { color: #e53935; }
+/* Upload progress bar inside chip */
+.attach-chip-progress {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  background: var(--gradient);
+  transition: width 0.2s linear;
+  border-radius: 0 0 10px 10px;
+}
+
+/* Paperclip attach button */
+.attach-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--tg-secondary-bg);
+  border: 1.5px solid rgba(108,92,231,0.18);
+  color: var(--tg-hint);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition), transform 0.1s;
+}
+.attach-btn:hover { color: var(--accent); border-color: rgba(108,92,231,0.40); }
+.attach-btn:active { transform: scale(0.9); }
+.attach-btn svg { width: 20px; height: 20px; }
+
+.input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.chat-input {
+  flex: 1;
+  background: var(--tg-secondary-bg);
+  color: var(--tg-text);
+  border: 1.5px solid transparent;
+  border-radius: 22px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.4;
+  transition: border-color 0.18s ease, background var(--transition);
+}
+.chat-input:focus { border-color: rgba(108,92,231,0.40); }
+.chat-input::placeholder { color: var(--tg-hint); }
+.chat-input::-webkit-scrollbar { width: 0; }
+
+.send-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--gradient);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(108,92,231,0.35);
+  transition: transform 0.1s, opacity var(--transition), box-shadow 0.1s;
+}
+.send-btn:active  { transform: scale(0.9); box-shadow: none; }
+.send-btn:disabled{ opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.send-btn svg { width: 20px; height: 20px; }
+
+/* ── 17. Files screen ── */
+.files-list {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--tg-secondary-bg);
+  border-radius: var(--radius-card);
+  padding: 13px 14px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(128,128,128,0.08);
+  animation: pop-in 0.16s ease both;
+  text-decoration: none;
+  color: inherit;
+}
+/* File icon tile uses same accent-tint style as service cards */
+.file-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: var(--accent-tint);
+  border: 1px solid rgba(108,92,231,0.12);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+/* Per-kind tints for file icons */
+.file-icon--presentation  { color: #6C5CE7; background: rgba(108,92,231,0.10); border-color: rgba(108,92,231,0.14); }
+.file-icon--file-text     { color: #00B8D9; background: rgba(0,184,217,0.10);  border-color: rgba(0,184,217,0.14); }
+.file-icon--book-open     { color: #10b981; background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.14); }
+.file-icon--list-checks   { color: #f59e0b; background: rgba(245,158,11,0.10); border-color: rgba(245,158,11,0.14); }
+.file-icon--grid-3x3      { color: #8b5cf6; background: rgba(139,92,246,0.10); border-color: rgba(139,92,246,0.14); }
+.file-icon--pen-line      { color: #ef4444; background: rgba(239,68,68,0.10);  border-color: rgba(239,68,68,0.14); }
+.file-icon--target         { color: #f97316; background: rgba(249,115,22,0.10); border-color: rgba(249,115,22,0.14); }
+.file-icon--columns-2     { color: #06b6d4; background: rgba(6,182,212,0.10);  border-color: rgba(6,182,212,0.14); }
+.file-icon--file-blank    { color: var(--accent); background: var(--accent-tint); border-color: rgba(108,92,231,0.12); }
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+.file-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tg-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.1px;
+}
+.file-meta {
+  font-size: 12px;
+  color: var(--tg-hint);
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Status badge with colored dot (no emoji/symbol) */
+.file-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.badge-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-queued  { background: rgba(240,165,0,0.12); color: #b97600; }
+.badge-queued  .badge-dot  { background: #f0a500; }
+.badge-running { background: rgba(108,92,231,0.12); color: var(--accent); }
+.badge-running .badge-dot  { background: var(--accent); animation: pulse-dot 1.2s infinite; }
+.badge-done    { background: rgba(34,197,94,0.12);  color: #15803d; }
+.badge-done    .badge-dot  { background: #22c55e; }
+.badge-failed  { background: rgba(229,57,53,0.12);  color: #c62828; }
+.badge-failed  .badge-dot  { background: #e53935; }
+
+.file-dl-btn {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(108,92,231,0.10);
+  border: 1px solid rgba(108,92,231,0.12);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--transition), transform 0.1s;
+}
+.file-dl-btn:active { transform: scale(0.9); }
+.file-dl-btn svg { width: 18px; height: 18px; }
+
+/* ── 18. Profile screen ── */
+.profile-content {
+  padding: 0 16px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--tg-secondary-bg);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(128,128,128,0.08);
+}
+.profile-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--gradient);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+.profile-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--tg-text);
+  letter-spacing: -0.2px;
+}
+.profile-sub {
+  font-size: 13px;
+  color: var(--tg-hint);
+  margin-top: 2px;
+}
+
+/* Ring progress */
+.profile-ring-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+.ring-svg { width: 140px; height: 140px; }
+.ring-track {
+  fill: none;
+  stroke: var(--tg-secondary-bg);
+  stroke-width: 10;
+}
+.ring-fill {
+  fill: none;
+  stroke-width: 10;
+  stroke: url(#ring-gradient);
+  stroke-linecap: round;
+  stroke-dasharray: 314;
+  stroke-dashoffset: 314;
+  transform-origin: center;
+  transform: rotate(-90deg);
+  transition: stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1);
+}
+.ring-text {
+  font-size: 22px;
+  font-weight: 700;
+  fill: var(--tg-text);
+  font-family: 'Inter', sans-serif;
+}
+.ring-sub {
+  font-size: 11px;
+  fill: var(--tg-hint);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Stat boxes */
+.profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.stat-box {
+  background: var(--tg-secondary-bg);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(128,128,128,0.08);
+}
+.stat-val {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+}
+.stat-lbl {
+  font-size: 12px;
+  color: var(--tg-hint);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* How it works */
+.how-section {
+  background: var(--tg-secondary-bg);
+  border-radius: var(--radius-card);
+  padding: 18px 16px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(128,128,128,0.08);
+}
+.how-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tg-text);
+  margin-bottom: 16px;
+  letter-spacing: -0.1px;
+}
+.how-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.how-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+/* How-step icon tile — small 36px tile with accent tint */
+.how-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--accent-tint);
+  border: 1px solid rgba(108,92,231,0.12);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.how-text {
+  font-size: 13.5px;
+  color: var(--tg-text);
+  line-height: 1.5;
+  padding-top: 6px;
+}
+.how-text b { color: var(--tg-text); font-weight: 600; }
+
+/* ── 19. Skeleton loaders ── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.skel-card, .skel-row {
+  background: linear-gradient(90deg, var(--tg-secondary-bg) 25%, rgba(128,128,128,0.10) 50%, var(--tg-secondary-bg) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: var(--radius-card);
+}
+.skel-card { height: 60px; }
+.skel-row {
+  height: 64px;
+  margin: 0 16px 8px;
+}
+.files-skeleton { padding-top: 4px; }
+
+/* ── 20. Empty states ── */
+.empty-state {
+  text-align: center;
+  color: var(--tg-hint);
+  padding: 48px 24px;
+  font-size: 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.empty-state-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px; height: 72px;
+  border-radius: 22px;
+  background: var(--accent-tint);
+  border: 1px solid rgba(108,92,231,0.12);
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.empty-state-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--tg-text);
+  letter-spacing: -0.3px;
+}
+.empty-state-sub { font-size: 13.5px; color: var(--tg-hint); line-height: 1.5; }
+
+/* ── 21. Utility ── */
+.hidden { display: none !important; }
+
+/* Attachment chips inside message bubbles (shows uploaded file names) */
+.bubble-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.bubble-attach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  max-width: 150px;
+}
+.bubble-attach-chip span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.msg-row.in .bubble-attach-chip {
+  background: rgba(108,92,231,0.10);
+  color: var(--accent);
+}
+
+/* ── 22. Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
