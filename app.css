@@ -545,6 +545,23 @@ body {
   flex-wrap: wrap;
 }
 
+.plan-tier-note, .plan-busy-msg {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--tg-hint);
+  line-height: 1.4;
+}
+.plan-busy-msg { color: var(--tg-text); font-size: 13px; }
+.job-premium-badge {
+  background: linear-gradient(135deg, #b8860b, #f5c542);
+  color: #fff;
+  border-radius: 30px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
 /* ── 14. Job card with step checklist ── */
 .job-card {
   background: var(--tg-secondary-bg);
