@@ -614,14 +614,27 @@ function renderPlanCard(plan, disabled = false) {
   const actions = document.createElement('div');
   actions.className = 'plan-actions';
 
+  const isDeck = json.kind === 'prezentatsiya';
   const startBtn = document.createElement('button');
   startBtn.className = 'btn btn-primary';
-  startBtn.innerHTML = icon('arrow-right', 16) + ' Boshlash';
+  startBtn.innerHTML = isDeck ? '⚡ Oddiy — ~2 daqiqa' : icon('arrow-right', 16) + ' Boshlash';
   startBtn.disabled = disabled;
   startBtn.addEventListener('click', () => {
     haptic('medium');
-    startPlan(plan.id, card);
+    startPlan(plan.id, card, 'ordinary');
   });
+
+  let premiumBtn = null;
+  if (isDeck) {
+    premiumBtn = document.createElement('button');
+    premiumBtn.className = 'btn btn-primary';
+    premiumBtn.innerHTML = '💎 Premium — 10–15 daqiqa';
+    premiumBtn.disabled = disabled;
+    premiumBtn.addEventListener('click', () => {
+      haptic('medium');
+      startPlan(plan.id, card, 'premium');
+    });
+  }
 
   const changeBtn = document.createElement('button');
   changeBtn.className = 'btn btn-ghost';
@@ -635,7 +648,14 @@ function renderPlanCard(plan, disabled = false) {
   });
 
   actions.appendChild(startBtn);
+  if (premiumBtn) actions.appendChild(premiumBtn);
   actions.appendChild(changeBtn);
+  if (premiumBtn) {
+    const note = document.createElement('div');
+    note.className = 'plan-tier-note';
+    note.textContent = 'Premium taqdimot ancha chiroyli, lekin tayyorlanishi 10–15 daqiqa davom etadi.';
+    actions.appendChild(note);
+  }
   card.appendChild(actions);
 
   return card;
@@ -684,7 +704,14 @@ function renderJobCard(job) {
   const titleEl = document.createElement('span');
   titleEl.className = 'job-title';
   titleEl.textContent = job.title || 'Fayl tayyorlanmoqda';
-  header.append(badge, titleEl);
+  header.appendChild(badge);
+  if (job.tier === 'premium') {
+    const prem = document.createElement('span');
+    prem.className = 'job-premium-badge';
+    prem.textContent = '💎 Premium';
+    header.appendChild(prem);
+  }
+  header.appendChild(titleEl);
   card.appendChild(header);
 
   // Status row
@@ -968,13 +995,29 @@ async function sendMessage(text, atts = []) {
    START PLAN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-async function startPlan(planId, cardEl) {
+async function startPlan(planId, cardEl, tier = 'ordinary') {
   cardEl?.querySelectorAll('button').forEach(b => { b.disabled = true; });
 
   const { ok, data, status } = await apiFetch(`/api/plan/${planId}/start`, {
     method: 'POST',
-    body: JSON.stringify({}),
+    body: JSON.stringify({ tier }),
   });
+
+  if (ok && data?.busy) {
+    hapticNotif('error');
+    cardEl?.querySelectorAll('.plan-busy-msg, .plan-busy-btn').forEach(e => e.remove());
+    const msg = document.createElement('div');
+    msg.className = 'plan-busy-msg';
+    msg.textContent = data.message;
+    const fallback = document.createElement('button');
+    fallback.className = 'btn btn-primary plan-busy-btn';
+    fallback.textContent = 'Oddiy taqdimot yaratish';
+    fallback.addEventListener('click', () => { haptic('medium'); startPlan(planId, cardEl, 'ordinary'); });
+    const actions = cardEl?.querySelector('.plan-actions');
+    actions?.append(msg, fallback);
+    actions?.querySelectorAll('button').forEach(b => { if (b !== fallback) b.disabled = false; });
+    return;
+  }
 
   if (!ok || !data) {
     hapticNotif('error');
