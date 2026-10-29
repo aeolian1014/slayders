@@ -425,7 +425,7 @@ function injectRingGradient() {
    TYPING INDICATOR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-function showTyping() { $typing.classList.remove('hidden'); scrollToBottom(); }
+function showTyping() { $typing.classList.remove('hidden'); scrollToBottom(false); }
 function hideTyping() { $typing.classList.add('hidden'); }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -694,6 +694,7 @@ function renderJobCard(job) {
   const card = document.createElement('div');
   card.className = `job-card status-${job.status}`;
   card.id = `job-${job.id}`;
+  card.dataset.sig = jobSignature(job);
 
   // Header
   const header = document.createElement('div');
@@ -781,10 +782,18 @@ function _jobStatusText(job) {
   return base;
 }
 
+// Only touch the card when something visible changed; replacing it every poll restarted its animations (the "shaking").
+function jobSignature(job) {
+  return [job.status, job.position, job.error, !!job.download, job.title, jobStepStates(job).join(',')].join('|');
+}
 function updateJobCard(job) {
   const existing = document.getElementById(`job-${job.id}`);
   if (!existing) return;
+  const sig = jobSignature(job);
+  if (existing.dataset.sig === sig) return;
   const fresh = renderJobCard(job);
+  fresh.dataset.sig = sig;
+  fresh.classList.add('no-anim'); // no pop-in again for a card that is already on screen
   existing.replaceWith(fresh);
 }
 
