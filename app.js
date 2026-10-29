@@ -1183,6 +1183,97 @@ $attachBtn.addEventListener('click', () => { haptic('light'); $fileInput.click()
 $fileInput.addEventListener('change', () => { addFiles([...$fileInput.files]); $fileInput.value = ''; });
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOP-UP (same rules/messages as the chat: 10 min reservation, own amount min 3000 ending 000)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const $topupSheet = document.getElementById('topup-sheet');
+const $topupBody  = document.getElementById('topup-body');
+let topupTimer = null;
+const sp = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+function closeTopup() {
+  clearInterval(topupTimer);
+  $topupSheet.classList.add('hidden');
+}
+
+async function openTopup() {
+  const { data } = await apiFetch('/api/pay/options');
+  if (!data) return;
+  $topupSheet.classList.remove('hidden');
+  $topupBody.innerHTML = `
+    <h3>Hisobni to'ldirish</h3>
+    <div class="topup-grid">${data.options.map(a => `<button class="btn btn-ghost" data-base="${a}">${sp(a)} so'm</button>`).join('')}</div>
+    <div class="topup-own">
+      <input id="topup-input" type="text" inputmode="numeric" placeholder="Boshqa summa (so'm)" />
+      <button class="btn btn-primary" id="topup-go" type="button">Davom etish</button>
+    </div>
+    <p class="topup-warn" id="topup-err">🔴 Kamida ${sp(data.min)} so'm, summa 000 bilan tugashi kerak (6545 yoki 8700 kabi summalar qabul qilinmaydi).</p>`;
+  $topupBody.querySelectorAll('[data-base]').forEach(b => b.onclick = () => reservePay(Number(b.dataset.base)));
+  document.getElementById('topup-go').onclick = () => {
+    const raw = document.getElementById('topup-input').value.replace(/[\s,.']/g, '');
+    const n = Number(raw);
+    const err = !/^\d+$/.test(raw) ? '🔴 Faqat raqam yozing.'
+      : n < data.min ? `🔴 Minimal summa ${sp(data.min)} so'm.`
+      : n % 1000 ? '🔴 Summa 000 bilan tugashi kerak (masalan 6000, 15000).' : '';
+    if (err) { document.getElementById('topup-err').textContent = err; return; }
+    reservePay(n);
+  };
+}
+
+async function reservePay(base) {
+  const { ok, data } = await apiFetch('/api/pay/reserve', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base }),
+  });
+  if (!ok) { document.getElementById('topup-err').textContent = '🔴 ' + (data?.error || 'Xatolik'); return; }
+  showPay(data);
+}
+
+function showPay(p) {
+  const admin = p.admin ? ` @${esc(p.admin)}` : '';
+  $topupBody.innerHTML = `
+    <h3>To'lov ma'lumotlari</h3>
+    <p>💰 <b>Aniq summa:</b> <code>${p.amount}</code> (${sp(p.amount)} so'm)</p>
+    <p>💳 <b>Karta raqami:</b> <code>${esc(p.card)}</code></p>
+    <p>👤 <b>Karta egasi:</b> ${esc(p.owner)}</p>
+    <p>⏱ Bu summa siz uchun <b id="topup-left"></b> band qilingan.</p>
+    <p>🎁 Balansingizga <b>${sp(p.base)} so'm</b> qo'shiladi.</p>
+    <p class="topup-warn">🔴 <b>DIQQAT!</b> Aniq <b>${sp(p.amount)} so'm</b> yuborsangiz, to'lov darhol avtomatik tasdiqlanadi.</p>
+    <p class="topup-warn">🔴 Aniq summani yubormasangiz yoki vaqt tugagach yuborsangiz, to'lov avtomatik tasdiqlanmaydi — adminga yozing:${admin}</p>
+    <div class="topup-own"><button class="btn btn-primary" id="topup-check" type="button">To'lovni tekshirish</button>
+    <button class="btn btn-secondary" id="topup-cancel" type="button">Bekor qilish</button></div>
+    <p id="topup-status" class="topup-status"></p>`;
+  const status = document.getElementById('topup-status');
+  const tick = () => {
+    const s = Math.max(0, Math.round((p.expiresAt - Date.now()) / 1000));
+    document.getElementById('topup-left').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  };
+  const check = async () => {
+    const { data } = await apiFetch('/api/pay/' + p.id);
+    if (!data) return;
+    if (data.status === 'paid') {
+      clearInterval(topupTimer);
+      status.textContent = `🎉 To'lov tasdiqlandi! Balans: ${sp(data.balance)} so'm`;
+      loadMe();
+    } else if (data.status !== 'pending') {
+      clearInterval(topupTimer);
+      status.textContent = '⌛ Summaning muddati tugadi. Yangisini oling.';
+    } else if (Date.now() < p.expiresAt) {
+      status.textContent = '⏳ To\'lov hali kelmadi.';
+    }
+  };
+  tick(); clearInterval(topupTimer);
+  topupTimer = setInterval(() => { tick(); check(); }, 5000);
+  document.getElementById('topup-check').onclick = check;
+  document.getElementById('topup-cancel').onclick = async () => {
+    await apiFetch(`/api/pay/${p.id}/cancel`, { method: 'POST' });
+    closeTopup();
+  };
+}
+
+document.getElementById('topup-open').addEventListener('click', openTopup);
+document.getElementById('topup-close').addEventListener('click', closeTopup);
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    INIT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
