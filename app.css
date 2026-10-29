@@ -1221,3 +1221,28 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Top-up sheet ── */
+.topup-open { width: 100%; margin: 12px 0; }
+.topup-sheet {
+  position: fixed; inset: 0; z-index: 200; display: flex; align-items: flex-end;
+  background: rgba(0,0,0,0.45);
+}
+.topup-sheet.hidden { display: none; }
+.topup-box {
+  position: relative; width: 100%; max-height: 90vh; overflow-y: auto;
+  background: var(--tg-bg); color: var(--tg-text);
+  border-radius: 20px 20px 0 0; padding: 20px 16px 28px;
+}
+.topup-box h3 { margin: 0 0 12px; }
+.topup-box p { margin: 8px 0; line-height: 1.4; }
+.topup-box code { background: var(--accent-tint); padding: 2px 6px; border-radius: 6px; user-select: all; }
+.topup-close { position: absolute; top: 8px; right: 12px; border: 0; background: none; font-size: 28px; color: var(--tg-hint); }
+.topup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.topup-own { display: flex; gap: 8px; margin: 12px 0; }
+.topup-own input {
+  flex: 1; min-width: 0; padding: 9px 14px; border-radius: 30px; font: inherit;
+  border: 1.5px solid rgba(128,128,128,0.30); background: var(--tg-secondary-bg); color: var(--tg-text);
+}
+.topup-warn { font-size: 13px; color: #e53935; }
+.topup-status { font-weight: 600; }
