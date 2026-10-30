@@ -626,7 +626,9 @@ function renderPlanCard(plan, disabled = false) {
     const b = document.createElement('button');
     b.className = 'btn btn-primary plan-size-btn' + (balance < price ? ' plan-size-low' : '');
     const single = !unit; // krossvord, SWOT, T-chizma: one size, only the price matters
-    b.innerHTML = `<span>${single ? 'Boshlash' : size + ' ' + unit}</span><span class="plan-size-price">${som(price)} so'm</span>`;
+    const free = !!state.me?.isAdmin; // admins are not charged
+    if (free) b.classList.remove('plan-size-low');
+    b.innerHTML = `<span>${single ? 'Boshlash' : size + ' ' + unit}</span><span class="plan-size-price">${free ? 'bepul (admin)' : som(price) + " so'm"}</span>`;
     b.disabled = disabled;
     b.addEventListener('click', () => { haptic('medium'); startPlan(plan.id, card, tier, size); });
     return b;
