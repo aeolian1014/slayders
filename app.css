@@ -957,7 +957,8 @@ body {
   margin-top: 3px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 2px 8px;
 }
 
 /* Status badge with colored dot (no emoji/symbol) */
