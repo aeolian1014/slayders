@@ -616,25 +616,43 @@ function renderPlanCard(plan, disabled = false) {
   actions.className = 'plan-actions';
 
   const isDeck = json.kind === 'prezentatsiya';
+  // Presentations: fixed price per size, shown on the button itself (the tap is the confirmation)
+  const som = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const prices = state.me?.prices || { ordinary: { 10: 5000, 15: 7000, 20: 9000 }, premium: { 12: 15000, 16: 19000 } };
+  const balance = state.me?.balance ?? 0;
+  const sizeBtn = (tier, slides, price) => {
+    const b = document.createElement('button');
+    b.className = 'btn btn-primary plan-size-btn' + (balance < price ? ' plan-size-low' : '');
+    b.innerHTML = `<span>${slides} slayd</span><span class="plan-size-price">${som(price)} so'm</span>`;
+    b.disabled = disabled;
+    b.addEventListener('click', () => { haptic('medium'); startPlan(plan.id, card, tier, slides); });
+    return b;
+  };
+
   const startBtn = document.createElement('button');
   startBtn.className = 'btn btn-primary';
-  startBtn.innerHTML = isDeck ? '⚡ Oddiy — ~2 daqiqa' : icon('arrow-right', 16) + ' Boshlash';
+  startBtn.innerHTML = icon('arrow-right', 16) + ' Boshlash';
   startBtn.disabled = disabled;
   startBtn.addEventListener('click', () => {
     haptic('medium');
     startPlan(plan.id, card, 'ordinary');
   });
 
-  let premiumBtn = null;
+  let sizeBox = null;
   if (isDeck) {
-    premiumBtn = document.createElement('button');
-    premiumBtn.className = 'btn btn-primary';
-    premiumBtn.innerHTML = '💎 Premium — 10–15 daqiqa';
-    premiumBtn.disabled = disabled;
-    premiumBtn.addEventListener('click', () => {
-      haptic('medium');
-      startPlan(plan.id, card, 'premium');
-    });
+    sizeBox = document.createElement('div');
+    sizeBox.className = 'plan-sizes';
+    const group = (label, tier) => {
+      const h = document.createElement('div');
+      h.className = 'plan-sizes-head';
+      h.textContent = label;
+      const row = document.createElement('div');
+      row.className = 'plan-sizes-row';
+      Object.entries(prices[tier]).forEach(([n, p]) => row.appendChild(sizeBtn(tier, Number(n), p)));
+      sizeBox.append(h, row);
+    };
+    group('⚡ Oddiy — ~2 daqiqa', 'ordinary');
+    group('💎 Premium — 10–15 daqiqa', 'premium');
   }
 
   const changeBtn = document.createElement('button');
@@ -648,13 +666,12 @@ function renderPlanCard(plan, disabled = false) {
     autoGrow($input);
   });
 
-  actions.appendChild(startBtn);
-  if (premiumBtn) actions.appendChild(premiumBtn);
+  actions.appendChild(isDeck ? sizeBox : startBtn);
   actions.appendChild(changeBtn);
-  if (premiumBtn) {
+  if (isDeck) {
     const note = document.createElement('div');
     note.className = 'plan-tier-note';
-    note.textContent = 'Premium taqdimot ancha chiroyli, lekin tayyorlanishi 10–15 daqiqa davom etadi.';
+    note.textContent = `Balansingiz: ${som(balance)} so'm. Premium taqdimot ancha chiroyli, lekin tayyorlanishi 10–15 daqiqa davom etadi. Tayyorlanmasa, pul qaytariladi.`;
     actions.appendChild(note);
   }
   card.appendChild(actions);
@@ -1008,12 +1025,12 @@ async function sendMessage(text, atts = []) {
    START PLAN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-async function startPlan(planId, cardEl, tier = 'ordinary') {
+async function startPlan(planId, cardEl, tier = 'ordinary', slides) {
   cardEl?.querySelectorAll('button').forEach(b => { b.disabled = true; });
 
   const { ok, data, status } = await apiFetch(`/api/plan/${planId}/start`, {
     method: 'POST',
-    body: JSON.stringify({ tier }),
+    body: JSON.stringify({ tier, slides }),
   });
 
   if (ok && data?.busy) {
@@ -1041,9 +1058,14 @@ async function startPlan(planId, cardEl, tier = 'ordinary') {
       'error'
     );
     cardEl?.querySelectorAll('button').forEach(b => { b.disabled = false; });
+    if (status === 402 && data?.need) openTopup(); // not enough money: straight to the top-up sheet
     return;
   }
 
+  if (data.balance != null) { // the price was taken: show the new balance
+    state.me = { ...state.me, balance: data.balance };
+    updateQuota(state.me.freeLeft, state.me.freeLimit, data.balance, state.me.price);
+  }
   const job = data.job;
   state.jobs.push(job);
   const jobCard = renderJobCard(job);
