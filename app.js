@@ -439,7 +439,16 @@ function hideChips() {
   $chipsBar.classList.add('hidden');
 }
 
-document.querySelectorAll('.chip').forEach(btn => {
+// Starter suggestions shown in an empty (newly opened) chat
+const STARTERS = [
+  'Prezentatsiya tayyorlab ber: ',
+  'Referat yozib ber: ',
+  'Esse yozib ber: ',
+  'Test savollari tuzib ber: ',
+  'SWOT tahlil qilib ber: ',
+];
+
+function bindChip(btn) {
   btn.addEventListener('click', () => {
     haptic('medium');
     $input.value = btn.dataset.text;
@@ -447,7 +456,8 @@ document.querySelectorAll('.chip').forEach(btn => {
     $input.focus();
     hideChips();
   });
-});
+}
+document.querySelectorAll('.chip').forEach(bindChip);
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    TAB NAVIGATION
@@ -862,7 +872,11 @@ async function loadHistory() {
     empty.innerHTML =
       `<div class="empty-state-icon">${icon('book-open', 40)}</div>` +
       '<div class="empty-state-title">Salom! Men Slayders AI</div>' +
-      '<div class="empty-state-sub">Referat, prezentatsiya, esse va boshqalar<br>uchun pastdagi xizmatlardan birini tanlang.</div>';
+      '<div class="empty-state-sub">Referat, prezentatsiya, esse va boshqalar<br>uchun pastdagi xizmatlardan birini tanlang.</div>' +
+      '<div class="starter-chips">' +
+      STARTERS.map(t => `<button class="chip" data-text="${esc(t)}">${esc(t.replace(/:\s*$/, ''))}</button>`).join('') +
+      '</div>';
+    empty.querySelectorAll('.chip').forEach(bindChip);
     $msgs.appendChild(empty);
   } else {
     for (const msg of messages) {
