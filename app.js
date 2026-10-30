@@ -532,13 +532,14 @@ function buildServiceGrid() {
     `;
     btn.addEventListener('click', () => {
       haptic('medium');
-      const msg = `Menga ${svc.label} kerak`;
       switchTab('chat');
+      state.pendingService = svc.key; // sent with the student's first real message; nothing is sent (or charged) by the tap itself
       // Small delay so the tab animation completes
       setTimeout(() => {
-        $input.value = msg;
-        autoGrow($input);
-        handleSend();
+        $msgs.querySelector('.empty-state')?.remove();
+        $msgs.appendChild(renderBubble('assistant', `${svc.label} tayyorlaymiz. Mavzu, fan va hajmini yozing (masalan: «Iqtisodiyot, Raqamli iqtisodiyot, 15 slayd»).`, new Date().toISOString()));
+        scrollToBottom();
+        $input.focus();
       }, 120);
     });
 
@@ -896,7 +897,7 @@ function renderFilesList() {
 
     const titleEl = document.createElement('div');
     titleEl.className = 'file-title';
-    titleEl.textContent = KIND_LABELS[job.kind] || job.kind || 'Fayl';
+    titleEl.textContent = job.title || KIND_LABELS[job.kind] || job.kind || 'Fayl';
 
     const meta = document.createElement('div');
     meta.className = 'file-meta';
@@ -912,7 +913,9 @@ function renderFilesList() {
     lblSpan.textContent = JOB_STATUS_LABELS[job.status] || job.status;
     statusBadge.append(dotSpan, lblSpan);
 
-    meta.append(dateSpan, statusBadge);
+    const kindSpan = document.createElement('span');
+    kindSpan.textContent = (KIND_LABELS[job.kind] || job.kind || 'Fayl') + (job.tier === 'premium' ? ' · Premium' : '');
+    meta.append(kindSpan, dateSpan, statusBadge);
     info.append(titleEl, meta);
     row.append(iconEl, info);
 
@@ -959,7 +962,7 @@ async function sendMessage(text, atts = []) {
   try {
     const { ok, status, data } = await apiFetch('/api/chat', {
       method: 'POST',
-      body: JSON.stringify({ text, attachmentIds: atts.map(a => a.id) }),
+      body: JSON.stringify({ text, attachmentIds: atts.map(a => a.id), service: state.pendingService || undefined }),
     });
     hideTyping();
 
@@ -973,6 +976,7 @@ async function sendMessage(text, atts = []) {
       showBanner("Serverda xatolik yuz berdi. Qayta urinib ko'ring.", 'error');
       userBubble.remove();
     } else {
+      state.pendingService = null;
       updateQuota(data.freeLeft, state.me?.freeLimit, data.balance, state.me?.price);
       if (data.me) state.me = { ...state.me, ...data.me };
 
