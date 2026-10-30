@@ -1193,6 +1193,7 @@ body {
   letter-spacing: -0.3px;
 }
 .empty-state-sub { font-size: 13.5px; color: var(--tg-hint); line-height: 1.5; }
+.starter-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
 
 /* ── 21. Utility ── */
 .hidden { display: none !important; }
