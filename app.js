@@ -618,14 +618,17 @@ function renderPlanCard(plan, disabled = false) {
   const isDeck = json.kind === 'prezentatsiya';
   // Presentations: fixed price per size, shown on the button itself (the tap is the confirmation)
   const som = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  const prices = state.me?.prices || { ordinary: { 10: 5000, 15: 7000, 20: 9000 }, premium: { 12: 15000, 16: 19000 } };
+  const ladders = state.me?.ladders || {};
+  const kindKey = (state.me?.aliases || {})[json.kind] || json.kind;
+  const ladder = ladders[kindKey]; // { ordinary: {unit, sizes}, premium?: {...} } or undefined
   const balance = state.me?.balance ?? 0;
-  const sizeBtn = (tier, slides, price) => {
+  const sizeBtn = (tier, size, price, unit) => {
     const b = document.createElement('button');
     b.className = 'btn btn-primary plan-size-btn' + (balance < price ? ' plan-size-low' : '');
-    b.innerHTML = `<span>${slides} slayd</span><span class="plan-size-price">${som(price)} so'm</span>`;
+    const single = !unit; // krossvord, SWOT, T-chizma: one size, only the price matters
+    b.innerHTML = `<span>${single ? 'Boshlash' : size + ' ' + unit}</span><span class="plan-size-price">${som(price)} so'm</span>`;
     b.disabled = disabled;
-    b.addEventListener('click', () => { haptic('medium'); startPlan(plan.id, card, tier, slides); });
+    b.addEventListener('click', () => { haptic('medium'); startPlan(plan.id, card, tier, size); });
     return b;
   };
 
@@ -639,20 +642,24 @@ function renderPlanCard(plan, disabled = false) {
   });
 
   let sizeBox = null;
-  if (isDeck) {
+  if (ladder) {
     sizeBox = document.createElement('div');
     sizeBox.className = 'plan-sizes';
     const group = (label, tier) => {
-      const h = document.createElement('div');
-      h.className = 'plan-sizes-head';
-      h.textContent = label;
+      if (!ladder[tier]) return;
+      if (label) {
+        const h = document.createElement('div');
+        h.className = 'plan-sizes-head';
+        h.textContent = label;
+        sizeBox.appendChild(h);
+      }
       const row = document.createElement('div');
       row.className = 'plan-sizes-row';
-      Object.entries(prices[tier]).forEach(([n, p]) => row.appendChild(sizeBtn(tier, Number(n), p)));
-      sizeBox.append(h, row);
+      Object.entries(ladder[tier].sizes).forEach(([n, p]) => row.appendChild(sizeBtn(tier, Number(n), p, ladder[tier].unit)));
+      sizeBox.appendChild(row);
     };
-    group('⚡ Oddiy — ~2 daqiqa', 'ordinary');
-    group('💎 Premium — 10–15 daqiqa', 'premium');
+    if (isDeck) { group('⚡ Oddiy — ~2 daqiqa', 'ordinary'); group('💎 Premium — 10–15 daqiqa', 'premium'); }
+    else group(Object.keys(ladder.ordinary.sizes).length > 1 ? 'Hajmni tanlang' : '', 'ordinary');
   }
 
   const changeBtn = document.createElement('button');
@@ -666,12 +673,12 @@ function renderPlanCard(plan, disabled = false) {
     autoGrow($input);
   });
 
-  actions.appendChild(isDeck ? sizeBox : startBtn);
+  actions.appendChild(sizeBox || startBtn);
   actions.appendChild(changeBtn);
-  if (isDeck) {
+  if (sizeBox) {
     const note = document.createElement('div');
     note.className = 'plan-tier-note';
-    note.textContent = `Balansingiz: ${som(balance)} so'm. Premium taqdimot ancha chiroyli, lekin tayyorlanishi 10–15 daqiqa davom etadi. Tayyorlanmasa, pul qaytariladi.`;
+    note.textContent = `Balansingiz: ${som(balance)} so'm.` + (isDeck ? ' Premium taqdimot ancha chiroyli, lekin tayyorlanishi 10–15 daqiqa davom etadi.' : '') + ' Tayyorlanmasa, pul qaytariladi.';
     actions.appendChild(note);
   }
   card.appendChild(actions);
@@ -1025,12 +1032,12 @@ async function sendMessage(text, atts = []) {
    START PLAN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-async function startPlan(planId, cardEl, tier = 'ordinary', slides) {
+async function startPlan(planId, cardEl, tier = 'ordinary', size) {
   cardEl?.querySelectorAll('button').forEach(b => { b.disabled = true; });
 
   const { ok, data, status } = await apiFetch(`/api/plan/${planId}/start`, {
     method: 'POST',
-    body: JSON.stringify({ tier, slides }),
+    body: JSON.stringify({ tier, size }),
   });
 
   if (ok && data?.busy) {
