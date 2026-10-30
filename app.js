@@ -269,7 +269,7 @@ function autoGrow(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
-function scrollToBottom(smooth = true) {
+function scrollToBottom(smooth = false) { // smooth scrolling fought with the layout changes of each new bubble and read as shaking
   const el = $msgs;
   el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
 }
