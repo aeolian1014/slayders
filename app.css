@@ -329,15 +329,20 @@ body {
   text-overflow: ellipsis;
 }
 .service-card-ex {
-  align-self: flex-start;
-  margin-top: 4px;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--accent);
-  padding: 2px 8px;
   border-radius: var(--radius-chip);
   background: var(--accent-tint);
+  border: 1px solid rgba(108,92,231,0.25);
 }
+.service-card-ex:active { transform: scale(0.95); }
 
 /* Sample viewer: full-screen pages of a finished file */
 .ex-view {
