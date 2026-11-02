@@ -113,48 +113,56 @@ const JOB_STEPS = [
 const SERVICES = [
   {
     key:  'prezentatsiya',
+    ex:   6, // sample pages: public/ex-prezentatsiya-N.jpg
     label: 'Prezentatsiya',
     desc:  'Slaydlar bilan taqdimot',
     iconKey: 'presentation',
   },
   {
     key:  'referat',
+    ex:   4, // sample pages: public/ex-referat-N.jpg
     label: 'Referat',
     desc:  'Ilmiy matn va manbalar',
     iconKey: 'file-text',
   },
   {
     key:  'mustaqil_ish',
+    ex:   4, // sample pages: public/ex-mustaqil_ish-N.jpg
     label: 'Mustaqil ish',
     desc:  "O'quv topshiriqlar",
     iconKey: 'book-open',
   },
   {
     key:  'test',
+    ex:   3, // sample pages: public/ex-test-N.jpg
     label: 'Test',
     desc:  "Savollar to'plami",
     iconKey: 'list-checks',
   },
   {
     key:  'krossvord',
+    ex:   2, // sample pages: public/ex-krossvord-N.jpg
     label: 'Krossvord',
     desc:  "Soʼzlar panjara oʼyini",
     iconKey: 'grid-3x3',
   },
   {
     key:  'esse',
+    ex:   1, // sample pages: public/ex-esse-N.jpg
     label: 'Esse',
     desc:  'Fikrlar va mulohazalar',
     iconKey: 'pen-line',
   },
   {
     key:  'swot',
+    ex:   3, // sample pages: public/ex-swot-N.jpg
     label: 'SWOT tahlil',
     desc:  'Kuchli/zaif tomonlar',
     iconKey: 'target',
   },
   {
     key:  't_chizma',
+    ex:   2, // sample pages: public/ex-t_chizma-N.jpg
     label: 'T-chizma',
     desc:  "Taqqoslash jadvali",
     iconKey: 'columns-2',
@@ -524,6 +532,27 @@ if (tgWebApp?.BackButton) {
    HOME: SERVICE GRID
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+// Full-screen sample pages of a real finished file for one service.
+function showExamples(svc) {
+  const box = document.createElement('div');
+  box.className = 'ex-view';
+  const pages = Array.from({ length: svc.ex || 0 }, (_, i) => `<img src="ex-${svc.key}-${i + 1}.jpg" alt="${esc(svc.label)} namunasi, ${i + 1}-sahifa" loading="lazy">`).join('');
+  box.innerHTML = `
+    <div class="ex-head">
+      <span class="ex-title">${esc(svc.label)} — namuna</span>
+      <button class="ex-close" aria-label="Yopish">${icon('x', 20)}</button>
+    </div>
+    <div class="ex-pages">${pages}</div>
+    <button class="btn btn-primary ex-order">${esc(svc.label)} buyurtma qilish</button>`;
+  const close = () => box.remove();
+  box.querySelector('.ex-close').addEventListener('click', close);
+  box.querySelector('.ex-order').addEventListener('click', () => {
+    close();
+    [...$serviceGrid.querySelectorAll('.service-card')].find(c => c.getAttribute('aria-label') === svc.label)?.click();
+  });
+  document.body.appendChild(box);
+}
+
 function buildServiceGrid() {
   $serviceGrid.innerHTML = '';
   SERVICES.forEach((svc, i) => {
@@ -537,9 +566,13 @@ function buildServiceGrid() {
       <div class="service-card-body">
         <span class="service-card-label">${esc(svc.label)}</span>
         <span class="service-card-desc">${esc(svc.desc)}</span>
+        <span class="service-card-ex" role="button" tabindex="0">Namunani ko'rish</span>
       </div>
       <span class="service-card-arrow">${icon('arrow-right', 16)}</span>
     `;
+    const exBtn = btn.querySelector('.service-card-ex');
+    exBtn.addEventListener('click', e => { e.stopPropagation(); haptic('light'); showExamples(svc); });
+    exBtn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); showExamples(svc); } });
     btn.addEventListener('click', () => {
       haptic('medium');
       switchTab('chat');
@@ -670,7 +703,7 @@ function renderPlanCard(plan, disabled = false) {
       Object.entries(ladder[tier].sizes).forEach(([n, p]) => row.appendChild(sizeBtn(tier, Number(n), p, ladder[tier].unit)));
       sizeBox.appendChild(row);
     };
-    if (isDeck) { group('⚡ Oddiy — ~2 daqiqa', 'ordinary'); group('💎 Premium — 10–15 daqiqa', 'premium'); }
+    if (isDeck) { group('⚡ Oddiy — ~2 daqiqa', 'ordinary'); group('💎 Premium — tez kunda', 'premium'); }
     else group(Object.keys(ladder.ordinary.sizes).length > 1 ? 'Hajmni tanlang' : '', 'ordinary');
   }
 
@@ -690,7 +723,7 @@ function renderPlanCard(plan, disabled = false) {
   if (sizeBox) {
     const note = document.createElement('div');
     note.className = 'plan-tier-note';
-    note.textContent = `Balansingiz: ${som(balance)} so'm.` + (isDeck ? ' Premium taqdimot ancha chiroyli, lekin tayyorlanishi 10–15 daqiqa davom etadi.' : '') + ' Tayyorlanmasa, pul qaytariladi.';
+    note.textContent = `Balansingiz: ${som(balance)} so'm.` + (isDeck ? ' Premium taqdimot hozir ishlab chiqilmoqda.' : '') + ' Tayyorlanmasa, pul qaytariladi.';
     actions.appendChild(note);
   }
   card.appendChild(actions);
