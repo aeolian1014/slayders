@@ -71,6 +71,9 @@ body {
   height: var(--tg-viewport-stable-height, 100dvh);
   overflow: hidden;
   position: relative;
+  /* full screen: keep content below Telegram's own close/menu buttons (0 in the normal window) */
+  padding-top: calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px));
+  box-sizing: border-box;
 }
 
 /* ── 4. Screens ── */
