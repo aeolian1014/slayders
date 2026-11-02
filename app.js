@@ -1374,6 +1374,10 @@ async function init() {
   if (tg) {
     tg.ready();
     tg.expand();
+    // Owner: on computers open full screen (Telegram can't make the desktop popup just taller); phones stay expanded.
+    if (['tdesktop', 'macos', 'weba', 'webk', 'web'].includes(tg.platform) && tg.isVersionAtLeast?.('8.0')) {
+      try { tg.requestFullscreen(); } catch (e) { /* older clients: keep the normal window */ }
+    }
     applyTheme();
     tg.onEvent('themeChanged', applyTheme);
   }
