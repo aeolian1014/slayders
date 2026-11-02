@@ -33,6 +33,7 @@ const ICONS = {
   download:     `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>`,
   check:        `<polyline points="20 6 9 17 4 12"/>`,
   x:            `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`,
+  eye:          `<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>`,
   sparkles:     `<path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M5 3l.75 2.25L8 6l-2.25.75L5 9l-.75-2.25L2 6l2.25-.75z"/><path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75z"/>`,
   'arrow-right':`<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>`,
   'file-blank': `<path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/>`,
@@ -566,8 +567,8 @@ function buildServiceGrid() {
       <div class="service-card-body">
         <span class="service-card-label">${esc(svc.label)}</span>
         <span class="service-card-desc">${esc(svc.desc)}</span>
-        <span class="service-card-ex" role="button" tabindex="0">Namunani ko'rish</span>
       </div>
+      <span class="service-card-ex" role="button" tabindex="0" aria-label="${esc(svc.label)} namunasini ko'rish">${icon('eye', 16)} Namuna</span>
       <span class="service-card-arrow">${icon('arrow-right', 16)}</span>
     `;
     const exBtn = btn.querySelector('.service-card-ex');
