@@ -19,7 +19,11 @@
       <span class="sidebar-tag">Admin</span>
     </div>
     <ul class="sidebar-nav">
-      <li class="nav-item active" data-tab="umumiy">
+      <li class="nav-item active" data-tab="crm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        CRM
+      </li>
+      <li class="nav-item" data-tab="umumiy">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         Umumiy
       </li>
@@ -40,7 +44,8 @@
 
   <!-- Top tab bar (mobile) -->
   <nav class="top-tabs" id="topTabs">
-    <button class="tab-btn active" data-tab="umumiy" aria-label="Umumiy">
+    <button class="tab-btn active" data-tab="crm" aria-label="CRM"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+    <button class="tab-btn" data-tab="umumiy" aria-label="Umumiy">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     </button>
     <button class="tab-btn" data-tab="users" aria-label="Foydalanuvchilar">
@@ -57,7 +62,33 @@
   <main class="main-content">
 
     <!-- ── Tab: Umumiy ─────────────────────────────────────────────────────── -->
-    <section class="tab-panel active" id="tab-umumiy">
+    <section class="tab-panel active" id="tab-crm">
+      <div class="page-header">
+        <h2 class="section-title">CRM · <span id="crmToday"></span></h2>
+        <button class="btn-ghost" id="refreshCrm" title="Yangilash">↻</button>
+      </div>
+      <div class="stat-cards" id="crmKpis"></div>
+      <h3 class="section-subtitle">Oxirgi 30 kun</h3>
+      <div class="crm-chart-tabs chip-group" id="crmSeriesTabs">
+        <button class="chip active" data-k="users">Yangi foydalanuvchilar</button>
+        <button class="chip" data-k="messages">Xabarlar</button>
+        <button class="chip" data-k="jobs">Buyurtmalar</button>
+        <button class="chip" data-k="revenue">Daromad</button>
+      </div>
+      <div class="crm-chart" id="crmChart"></div>
+      <div class="crm-grid">
+        <div class="crm-box"><h3 class="section-subtitle">Voronka</h3><div id="crmFunnel"></div></div>
+        <div class="crm-box"><h3 class="section-subtitle">Buyurtmalar turi</h3><div id="crmJobsBy"></div></div>
+      </div>
+      <div class="crm-grid">
+        <div class="crm-box"><h3 class="section-subtitle">Jonli lenta</h3><div class="crm-feed" id="crmFeed"></div></div>
+        <div class="crm-box"><h3 class="section-subtitle">To'lovlar</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>#</th><th>Kim</th><th>Summa</th><th>Holat</th><th>Vaqt</th></tr></thead><tbody id="crmPayments"></tbody></table></div></div>
+      </div>
+      <h3 class="section-subtitle">Mijozlar (eng faol / to'lagan)</h3>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Ism</th><th>Username</th><th>To'lagan</th><th>Buyurtma</th><th>Xabar</th><th>Balans</th><th>Oxirgi faollik</th><th>A'zo</th></tr></thead><tbody id="crmUsers"></tbody></table></div>
+    </section>
+
+    <section class="tab-panel" id="tab-umumiy">
       <div class="page-header">
         <h2 class="section-title">Umumiy statistika</h2>
         <button class="btn-ghost" id="refreshStats" title="Yangilash">
@@ -209,5 +240,6 @@
   </main>
 
   <script src="/admin.js"></script>
+  <script src="/admin-crm.js"></script>
 </body>
 </html>
