@@ -3,7 +3,7 @@
 'use strict';
 
 let crmData = null, crmKey = 'users';
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const cEsc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const when = iso => (iso ? new Date(iso).toLocaleString('uz', { timeZone: 'Asia/Tashkent', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—');
 const som = n => fmt(n) + " so'm";
 
@@ -44,14 +44,14 @@ async function loadCrm() {
   document.getElementById('crmFunnel').innerHTML = crmData.funnel.map(f =>
     `<div class="crm-funnel-row"><span class="lbl">${f.step}</span><span class="bar" style="width:${Math.max(2, (f.n / f0) * 100) * 0.6}%"></span><span class="val">${f.n} <small style="color:#8a8f98">(${Math.round((f.n / f0) * 100)}%)</small></span></div>`).join('');
   document.getElementById('crmJobsBy').innerHTML = crmData.jobsBy.length ? crmData.jobsBy.map(j =>
-    `<div class="crm-funnel-row"><span class="lbl">${esc(j.kind)} · ${esc(j.tier)}</span><span class="val">${esc(j.status)}: ${j.n}</span></div>`).join('') : '<div style="color:#8a8f98">—</div>';
+    `<div class="crm-funnel-row"><span class="lbl">${cEsc(j.kind)} · ${cEsc(j.tier)}</span><span class="val">${cEsc(j.status)}: ${j.n}</span></div>`).join('') : '<div style="color:#8a8f98">—</div>';
   const ICON = { user: '🆕', job: '📄', payment: '💳' };
   document.getElementById('crmFeed').innerHTML = crmData.feed.map(e =>
-    `<div><span class="t">${when(e.t)}</span><span>${ICON[e.type] || '•'} <b>${esc(e.name)}</b> — ${esc(e.type === 'user' ? "botga qo'shildi" : e.info)}</span></div>`).join('');
+    `<div><span class="t">${when(e.t)}</span><span>${ICON[e.type] || '•'} <b>${cEsc(e.name)}</b> — ${cEsc(e.type === 'user' ? "botga qo'shildi" : e.info)}</span></div>`).join('');
   document.getElementById('crmPayments').innerHTML = crmData.payments.map(p =>
-    `<tr><td>${p.id}</td><td>${esc(p.name)}</td><td>${fmt(p.amount)}</td><td>${esc(p.status)}</td><td>${when(p.paid_at || p.created_at)}</td></tr>`).join('') || '<tr><td colspan="5">—</td></tr>';
+    `<tr><td>${p.id}</td><td>${cEsc(p.name)}</td><td>${fmt(p.amount)}</td><td>${cEsc(p.status)}</td><td>${when(p.paid_at || p.created_at)}</td></tr>`).join('') || '<tr><td colspan="5">—</td></tr>';
   document.getElementById('crmUsers').innerHTML = crmData.topUsers.map(u =>
-    `<tr data-user-id="${u.id}" style="cursor:pointer"><td>${esc(u.first_name)}</td><td>${u.username ? '@' + esc(u.username) : '—'}</td><td>${fmt(u.paid)}</td><td>${u.jobs}</td><td>${u.msgs}</td><td>${fmt(u.balance)}</td><td>${when(u.last_seen)}</td><td>${when(u.created_at)}</td></tr>`).join('');
+    `<tr data-user-id="${u.id}" style="cursor:pointer"><td>${cEsc(u.first_name)}</td><td>${u.username ? '@' + cEsc(u.username) : '—'}</td><td>${fmt(u.paid)}</td><td>${u.jobs}</td><td>${u.msgs}</td><td>${fmt(u.balance)}</td><td>${when(u.last_seen)}</td><td>${when(u.created_at)}</td></tr>`).join('');
 }
 
 document.getElementById('crmSeriesTabs').addEventListener('click', e => {
