@@ -402,4 +402,4 @@ function fmtDate(iso) {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
-activateTab('umumiy');
+activateTab('crm');
