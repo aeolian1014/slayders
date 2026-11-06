@@ -723,3 +723,17 @@ html, body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── CRM tab ── */
+.crm-chart{background:var(--card,#16181d);border-radius:12px;padding:14px;margin:8px 0 18px}
+.crm-chart svg{width:100%;height:220px;display:block}
+.crm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:18px}
+.crm-box{background:var(--card,#16181d);border-radius:12px;padding:14px;min-width:0}
+.crm-funnel-row{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:13px}
+.crm-funnel-row .lbl{width:120px;flex:none}
+.crm-funnel-row .bar{height:22px;border-radius:6px;background:linear-gradient(90deg,#5da8ff,#a29bfe);min-width:4px}
+.crm-funnel-row .val{flex:none;font-weight:600}
+.crm-feed{max-height:340px;overflow:auto;font-size:13px}
+.crm-feed div{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.crm-feed .t{color:var(--muted,#8a8f98);flex:none;width:92px}
+.stat-card .stat-sub{font-size:11px;color:var(--muted,#8a8f98);margin-top:2px}
